@@ -1,0 +1,29 @@
+{
+  "name": "opencode-discord-notification",
+  "version": "1.0.0",
+  "description": "OpenCode plugin that sends Discord notifications on session completion and permission requests.",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "opencode",
+    "plugin",
+    "discord",
+    "notification",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "latest",
+    "@types/bun": "latest",
+    "typescript": "latest"
+  }
+}
