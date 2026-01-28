@@ -2,6 +2,8 @@
 
 OpenCode plugin that sends Discord notifications on session completion and permission requests.
 
+![Example Notification](screenshots/example.png)
+
 ## Features
 
 - ✅ **Completion Notifications:** Get a Discord message when OpenCode finishes a long task.
