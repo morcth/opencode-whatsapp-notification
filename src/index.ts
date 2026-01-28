@@ -31,7 +31,7 @@ async function handleNotification(client: any, project: any, event: any, type: "
 
     if (!config.webhookUrl) {
       try {
-        const configPath = "/var/home/frieser/.config/opencode/plugins/discord-notification-config.json";
+        const configPath = "/var/home/frieser/.config/opencode/discord-notification-config.json";
         const configFile = Bun.file(configPath);
         if (await configFile.exists()) {
           config = await configFile.json();
