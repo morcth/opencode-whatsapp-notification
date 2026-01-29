@@ -4,18 +4,18 @@ export interface NotificationPayload {
   timestamp: string;
   projectName: string;
   peakTokens: number;
-  peakContextPercentage: string;
+  peakContextPercentage: number;
   modelName: string;
   lastText: string;
   pendingCommand?: string;
 }
 
+export type ValidationResult = { valid: true } | { valid: false; errors: string[] };
+
 export interface NotifierProvider {
   send(eventType: string, payload: NotificationPayload): Promise<void>;
-  validateConfig?(config: unknown): boolean;
+  validateConfig?(config: unknown): ValidationResult;
 }
-
-export type ProviderType = 'whatsapp-greenapi';
 
 export interface WhatsAppConfig {
   provider: 'whatsapp-greenapi';
@@ -28,7 +28,7 @@ export interface WhatsAppConfig {
 }
 
 export interface FallbackConfigPath {
-  provider: ProviderType;
+  provider: 'whatsapp-greenapi';
   enabled: boolean;
   fallbackConfigPath: string;
 }
