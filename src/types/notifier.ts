@@ -1,5 +1,3 @@
-import type { Plugin } from '@opencode-ai/plugin';
-
 export interface NotificationPayload {
   eventType: 'session.idle' | 'permission.asked';
   sessionId: string;
