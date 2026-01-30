@@ -42,16 +42,17 @@ export function buildPermissionAskedPayload(session: any, messages: any[], proje
   const basePayload = buildSessionIdlePayload(session, messages, project);
   let pendingCommand = '';
 
-  messages.forEach((m: any) => {
+  for (const m of messages) {
     const isAssistant = (m.info?.role || m.role) === 'assistant';
     if (isAssistant && m.parts) {
       const toolPart = m.parts.find((p: any) => p.type === 'tool' && (p.state?.status === 'pending' || p.state?.status === 'running'));
       if (toolPart) {
         const input = toolPart.state?.input || {};
         pendingCommand = input.command || input.filePath || JSON.stringify(input);
+        break;
       }
     }
-  });
+  }
 
   return {
     ...basePayload,
