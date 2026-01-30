@@ -1,6 +1,10 @@
 import type { NotificationPayload } from '../types/notifier';
 
 export function buildSessionIdlePayload(session: any, messages: any[], project: any): NotificationPayload {
+  console.log('[PayloadBuilder] Session keys:', Object.keys(session || {}));
+  console.log('[PayloadBuilder] Session.id:', session.id, 'session.properties:', session.properties);
+  console.log('[PayloadBuilder] Messages count:', messages.length);
+  
   const sessionId = session.id || session.properties?.sessionID || session.properties?.id;
   const modelName = session.model?.name || messages[messages.length - 1]?.info?.modelID || 'Unknown';
 
@@ -18,8 +22,11 @@ export function buildSessionIdlePayload(session: any, messages: any[], project: 
       }
     }
 
-    const text = m.parts?.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('\n');
-    if (text) lastText = text;
+    const textParts = m.parts?.filter((p: any) => p.type === 'text' && typeof p.text === 'string');
+    const text = textParts?.map((p: any) => p.text).join('\n');
+    if (text && text.trim().length > 0 && !text.includes('Please create a temp file') && !text.includes('git commit')) {
+      lastText = text.substring(0, 1500);
+    }
   });
 
   if (peakTokens > 0 && session.model?.limit?.context) {
@@ -54,6 +61,8 @@ export function buildPermissionAskedPayload(session: any, messages: any[], proje
     }
   }
 
+  console.log('[PayloadBuilder] Permission payload, pendingCommand:', pendingCommand ? pendingCommand.substring(0, 500) : 'none');
+  
   return {
     ...basePayload,
     eventType: 'permission.asked',
