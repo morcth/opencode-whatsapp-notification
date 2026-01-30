@@ -1,139 +1,81 @@
-import type { Plugin } from "@opencode-ai/plugin";
+import type { Plugin } from '@opencode-ai/plugin';
+import { ConfigLoader } from './config/loader';
+import { ProviderRegistry } from './providers/registry';
+import { buildSessionIdlePayload, buildPermissionAskedPayload } from './payload/builders';
+import { ConfigError } from './types/errors';
+import type { NotificationPayload } from './types/notifier';
 
-interface DiscordWebhookConfig {
-  webhookUrl?: string;
-  enabled?: boolean;
-  username?: string;
-  avatarUrl?: string;
-}
+export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) => {
+  const loader = new ConfigLoader();
+  let config;
 
-export const DiscordNotificationPlugin: Plugin = async ({ client, project }) => {
+  try {
+    config = await loader.load(project.config);
+  } catch (e: any) {
+    await client.app.log({
+      body: {
+        service: 'whatsapp-notifier',
+        level: 'error',
+        message: `Config error: ${e.message}`,
+      },
+    });
+    return { event: async () => {} };
+  }
+
+  if (!config.enabled) {
+    return { event: async () => {} };
+  }
+
+  const provider = ProviderRegistry.getProvider(config);
+
   return {
     event: async ({ event }) => {
-      // 1. Handle Session Completed (Green)
-      if (event.type === "session.idle") {
-        await handleNotification(client, project, event, "idle");
-      }
-      // 2. Handle Permission Request (Orange)
-      else if (event.type === "permission.asked") {
-        await handleNotification(client, project, event, "permission");
+      try {
+        if (event.type === 'session.idle') {
+          await handleNotification(client, project, event, 'idle');
+        } else if (event.type === 'permission.asked') {
+          await handleNotification(client, project, event, 'permission');
+        }
+      } catch (e: any) {
+        await client.app.log({
+          body: {
+            service: 'whatsapp-notifier',
+            level: 'error',
+            message: `Notification error: ${e.message}`,
+          },
+        });
       }
     },
   };
 };
 
-async function handleNotification(client: any, project: any, event: any, type: "idle" | "permission") {
-  try {
-    // 1. GET CONFIGURATION
-    // Priority 1: project.config (opencode.json)
-    // Priority 2: Local file (for development or if schema is strict)
-    let config: DiscordWebhookConfig = project.config?.discordNotifications || {};
+async function handleNotification(
+  client: any,
+  project: any,
+  event: any,
+  type: 'idle' | 'permission'
+) {
+  const sessionId = event.properties?.sessionID || event.properties?.id;
+  if (!sessionId) return;
 
-    if (!config.webhookUrl) {
-      try {
-        const configPath = "/var/home/frieser/.config/opencode/discord-notification-config.json";
-        const configFile = Bun.file(configPath);
-        if (await configFile.exists()) {
-          config = await configFile.json();
-        }
-      } catch (e) {}
-    }
-
-    if (!config.enabled || !config.webhookUrl) return;
-
-    const sessionId = event.properties?.sessionID || event.properties?.id || event.properties?.sessionId;
-    if (!sessionId) return;
-
-    // Only wait on idle to give tokens time to settle
-    if (type === "idle") {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-    }
-
-    const [sRes, mRes] = await Promise.all([
-      client.session.get({ path: { id: sessionId } }),
-      client.session.messages({ path: { id: sessionId } })
-    ]);
-    
-    const session = (sRes as any).data || sRes;
-    const messages = (mRes as any).data || mRes || [];
-
-    let lastText = "Response completed.";
-    let contextUsage = "N/A";
-    let modelName = session?.model?.name || "Unknown";
-    let totalTokensAccumulated = 0;
-    let pendingCommand = "";
-
-    // Analyze messages
-    messages.forEach((m: any) => {
-      const isAssistant = (m.info?.role || m.role) === "assistant";
-      if (isAssistant) {
-        const t = m.info?.tokens || m.tokens;
-        if (t) {
-          const turnTotal = (t.input || 0) + (t.output || 0) + (t.cache?.read || 0);
-          totalTokensAccumulated = Math.max(totalTokensAccumulated, turnTotal);
-        }
-        if (type === "permission" && m.parts) {
-          const toolPart = m.parts.find((p: any) => p.type === "tool" && (p.state?.status === "pending" || p.state?.status === "running"));
-          if (toolPart) {
-            const input = toolPart.state?.input || {};
-            pendingCommand = input.command || input.filePath || JSON.stringify(input);
-          }
-        }
-      }
-    });
-
-    if (totalTokensAccumulated > 0 && session?.model?.limit?.context) {
-      const percentage = ((totalTokensAccumulated / session.model.limit.context) * 100).toFixed(2);
-      contextUsage = `${percentage}%`;
-    }
-
-    const assistantMessages = messages.filter((m: any) => (m.info?.role || m.role) === "assistant");
-    const lastAssistant = assistantMessages[assistantMessages.length - 1];
-    if (lastAssistant) {
-      const text = lastAssistant.parts?.filter((p: any) => p.type === "text").map((p: any) => p.text).join("\n");
-      if (text) lastText = text;
-      modelName = (lastAssistant.info?.modelID || lastAssistant.modelID) || modelName;
-    }
-
-    const isPermission = type === "permission";
-    const title = isPermission ? "⚠️ Permission Required" : "✅ Response Completed";
-    const color = isPermission ? 0xffa500 : 0x00ff00;
-    
-    let description = lastText;
-    const fields = [
-      { name: "📊 Context Usage", value: contextUsage, inline: true },
-      { name: "🔢 Total Tokens", value: `${totalTokensAccumulated.toLocaleString()} tokens`, inline: true },
-      { name: "🤖 Model", value: modelName, inline: true }
-    ];
-
-    if (isPermission) {
-      fields.unshift({ 
-        name: "🔒 Blocked Command / Action", 
-        value: `\`\`\`bash\n${pendingCommand || "Check terminal for details"}\n\`\`\``, 
-        inline: false 
-      });
-      description = "OpenCode has paused execution and is waiting for you to authorize the operation shown above.";
-    }
-
-    await fetch(config.webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: config.username || "OpenCode Notifier",
-        avatar_url: config.avatarUrl,
-        embeds: [{
-          title,
-          description: description.length > 1500 ? description.substring(0, 1497) + "..." : description,
-          color,
-          fields,
-          footer: { text: `Session ID: ${sessionId}` },
-          timestamp: new Date().toISOString()
-        }]
-      }),
-    });
-  } catch (e) {
-    console.error("Discord Plugin Error:", e);
+  if (type === 'idle') {
+    await new Promise(resolve => setTimeout(resolve, 1500));
   }
+
+  const [sRes, mRes] = await Promise.all([
+    client.session.get({ path: { id: sessionId } }),
+    client.session.messages({ path: { id: sessionId } })
+  ]);
+
+  const session = (sRes as any).data || sRes;
+  const messages = (mRes as any).data || mRes || [];
+
+  const payload = type === 'idle'
+    ? buildSessionIdlePayload(session, messages, project)
+    : buildPermissionAskedPayload(session, messages, project);
+
+  const provider = ProviderRegistry.getProvider({ provider: 'whatsapp-greenapi', enabled: true } as any);
+  await provider.send(type === 'idle' ? 'session.idle' : 'permission.asked', payload);
 }
 
-export default DiscordNotificationPlugin;
+export default WhatsAppNotificationPlugin;
