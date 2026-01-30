@@ -25,5 +25,9 @@
     "@opencode-ai/plugin": "latest",
     "@types/bun": "latest",
     "typescript": "latest"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   }
 }
