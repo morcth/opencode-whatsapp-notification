@@ -31,7 +31,9 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
   return {
     event: async ({ event }) => {
       try {
-        console.log('[WhatsApp Notifier] Event received:', event.type, event.properties);
+        console.log('[WhatsApp Notifier] Event type:', event.type);
+        console.log('[WhatsApp Notifier] Event properties keys:', Object.keys(event.properties || {}));
+        
         if (event.type === 'session.idle') {
           await handleNotification(provider, client, project, event, 'idle');
         } else if ((event.type as string) === 'permission.asked') {
