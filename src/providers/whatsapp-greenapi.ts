@@ -41,16 +41,25 @@ export class WhatsAppGreenApiProvider implements NotifierProvider {
           throw new TransportError(status, `Auth/Client error: ${status}`);
         }
 
-        if (status >= 500 && status < 600 && attempt < maxAttempts) {
-          const delay = Math.pow(2, attempt) * 1000;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          lastError = new TransportError(status, responseText);
-          continue;
+        if (status >= 500 && status < 600) {
+          if (attempt < maxAttempts) {
+            const delay = Math.pow(2, attempt) * 1000;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            lastError = new TransportError(status, responseText);
+            continue;
+          }
+          throw new TransportError(status, responseText);
         }
 
         throw new TransportError(status, responseText);
       } catch (e: any) {
         if (e.name === 'TransportError') throw e;
+        if (attempt < maxAttempts) {
+          const delay = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          lastError = e;
+          continue;
+        }
         lastError = e;
       }
     }
