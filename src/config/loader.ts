@@ -27,6 +27,7 @@ export class ConfigLoader {
     } else {
       this.configPath = path.join(__dirname, 'config.json');
     }
+    console.log('[ConfigLoader] Loading config from:', this.configPath);
     this.fs = fs;
   }
 
@@ -87,8 +88,8 @@ export class ConfigLoader {
       throw new ConfigError('Invalid timeout: must be a positive number');
     }
 
-    return {
-      provider: 'whatsapp-greenapi',
+    const result = {
+      provider: 'whatsapp-greenapi' as const,
       enabled: true,
       apiUrl,
       instanceId,
@@ -97,5 +98,7 @@ export class ConfigLoader {
       timeout,
       fallbackConfigPath: this.configPath
     };
+    console.log('[ConfigLoader] Config loaded successfully, enabled:', result.enabled, 'chatId:', chatId);
+    return result;
   }
 }

@@ -15,6 +15,7 @@ export class WhatsAppGreenApiProvider implements NotifierProvider {
       chatId: this.config.chatId,
       message
     };
+    console.log('[WhatsApp Provider] Send called for', eventType, 'to', this.config.chatId);
 
     let lastError: Error | null = null;
     let attempt = 0;
@@ -31,6 +32,7 @@ export class WhatsAppGreenApiProvider implements NotifierProvider {
         });
 
         if (response.ok) {
+          console.log('[WhatsApp Provider] Success!');
           return;
         }
 
