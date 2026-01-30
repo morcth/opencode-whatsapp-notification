@@ -10,7 +10,7 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
   let config;
 
   try {
-    config = await loader.load(project.config);
+    config = await loader.load((project as any).config);
   } catch (e: any) {
     await client.app.log({
       body: {
@@ -33,7 +33,7 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
       try {
         if (event.type === 'session.idle') {
           await handleNotification(provider, client, project, event, 'idle');
-        } else if (event.type === 'permission.asked') {
+        } else if ((event.type as string) === 'permission.asked') {
           await handleNotification(provider, client, project, event, 'permission');
         }
       } catch (e: any) {
