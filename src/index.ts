@@ -32,9 +32,9 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
     event: async ({ event }) => {
       try {
         if (event.type === 'session.idle') {
-          await handleNotification(client, project, event, 'idle');
+          await handleNotification(provider, client, project, event, 'idle');
         } else if (event.type === 'permission.asked') {
-          await handleNotification(client, project, event, 'permission');
+          await handleNotification(provider, client, project, event, 'permission');
         }
       } catch (e: any) {
         await client.app.log({
@@ -50,6 +50,7 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
 };
 
 async function handleNotification(
+  provider: any,
   client: any,
   project: any,
   event: any,
@@ -74,7 +75,6 @@ async function handleNotification(
     ? buildSessionIdlePayload(session, messages, project)
     : buildPermissionAskedPayload(session, messages, project);
 
-  const provider = ProviderRegistry.getProvider({ provider: 'whatsapp-greenapi', enabled: true } as any);
   await provider.send(type === 'idle' ? 'session.idle' : 'permission.asked', payload);
 }
 
