@@ -12,11 +12,19 @@ OpenCode plugin that sends WhatsApp notifications on session completion and perm
 
 ## Installation
 
-Add it to your `opencode.json`:
+Clone the repository:
+
+```bash
+git clone <repo-url>
+cd opencode-whatsapp-notification
+bun install
+```
+
+Then add it to your `opencode.json`:
 
 ```json
 {
-  "plugin": ["opencode-whatsapp-notification"]
+  "plugin": ["/path/to/your/local/opencode-whatsapp-notification"]
 }
 ```
 
@@ -26,7 +34,7 @@ Create a configuration in your `opencode.json`:
 
 ```json
 {
-  "plugin": ["opencode-whatsapp-notification"],
+  "plugin": ["/path/to/your/local/opencode-whatsapp-notification"],
   "notifier": {
     "provider": "whatsapp-greenapi",
     "enabled": true,
