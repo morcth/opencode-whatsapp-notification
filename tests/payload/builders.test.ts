@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'bun:test';
 import { buildSessionIdlePayload, buildPermissionAskedPayload } from '../../src/payload/builders';
 import type { NotificationPayload } from '../../src/types/notifier';
 

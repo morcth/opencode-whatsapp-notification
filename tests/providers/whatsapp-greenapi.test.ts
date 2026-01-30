@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import { WhatsAppGreenApiProvider } from '../../src/providers/whatsapp-greenapi';
 import type { NotificationPayload } from '../../src/types/notifier';
 
@@ -9,7 +10,8 @@ describe('WhatsAppGreenApiProvider', () => {
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
       apiToken: 'test-token',
-      chatId: '11001100110@c.us'
+      chatId: '11001100110@c.us',
+      fallbackConfigPath: '/test/config.json'
     };
     const provider = new WhatsAppGreenApiProvider(config);
 
@@ -25,7 +27,7 @@ describe('WhatsAppGreenApiProvider', () => {
     };
 
     const calls: any[] = [];
-    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (input: any, init?: RequestInit): Promise<Response> => {
       const url = typeof input === 'string' ? input : input.toString();
       calls.push([url, init]);
       const body = init?.body ? JSON.parse(init.body as string) : {};
@@ -66,7 +68,8 @@ describe('WhatsAppGreenApiProvider', () => {
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
       apiToken: 'test-token',
-      chatId: '11001100110@c.us'
+      chatId: '11001100110@c.us',
+      fallbackConfigPath: '/test/config.json'
     };
     const provider = new WhatsAppGreenApiProvider(config);
 
@@ -83,7 +86,7 @@ describe('WhatsAppGreenApiProvider', () => {
     };
 
     const calls: any[] = [];
-    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (input: any, init?: RequestInit): Promise<Response> => {
       calls.push([typeof input === 'string' ? input : input.toString(), init]);
       return {
         ok: true,
@@ -110,7 +113,8 @@ describe('WhatsAppGreenApiProvider', () => {
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
       apiToken: 'test-token',
-      chatId: '11001100110@c.us'
+      chatId: '11001100110@c.us',
+      fallbackConfigPath: '/test/config.json'
     };
     const provider = new WhatsAppGreenApiProvider(config);
 
@@ -126,7 +130,7 @@ describe('WhatsAppGreenApiProvider', () => {
     };
 
     let attemptCount = 0;
-    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (input: any, init?: RequestInit): Promise<Response> => {
       attemptCount++;
       if (attemptCount < 2) {
         return {
@@ -154,7 +158,8 @@ describe('WhatsAppGreenApiProvider', () => {
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
       apiToken: 'test-token',
-      chatId: '11001100110@c.us'
+      chatId: '11001100110@c.us',
+      fallbackConfigPath: '/test/config.json'
     };
     const provider = new WhatsAppGreenApiProvider(config);
 
@@ -170,7 +175,7 @@ describe('WhatsAppGreenApiProvider', () => {
     };
 
     let attemptCount = 0;
-    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (input: any, init?: RequestInit): Promise<Response> => {
       attemptCount++;
       return {
         ok: false,

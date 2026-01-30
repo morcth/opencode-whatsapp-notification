@@ -25,6 +25,7 @@ export interface WhatsAppConfig {
   apiToken: string;
   chatId: string;
   timeout?: number;
+  fallbackConfigPath: string;
 }
 
 export interface FallbackConfigPath {

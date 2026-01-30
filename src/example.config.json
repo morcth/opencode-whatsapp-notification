@@ -1,0 +1,9 @@
+{
+  "provider": "whatsapp-greenapi",
+  "enabled": true,
+  "apiUrl": "https://api.green-api.com",
+  "instanceId": "YOUR_INSTANCE_ID",
+  "apiToken": "YOUR_API_TOKEN",
+  "chatId": "YOUR_PHONE_NUMBER@c.us",
+  "timeout": 10000
+}

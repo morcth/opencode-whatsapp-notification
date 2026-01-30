@@ -1,38 +1,76 @@
+import * as path from 'path';
+import * as url from 'url';
+import { fileURLToPath } from 'url';
 import type { NotifierConfig } from '../types/notifier';
 import { ConfigError } from '../types/errors';
 
-interface PartialProjectConfig {
-  notifier?: {
-    provider?: string;
-    enabled?: boolean;
-    apiUrl?: string;
-    instanceId?: string;
-    apiToken?: string;
-    chatId?: string;
-    timeout?: number;
-  };
+interface WhatsAppConfigFile {
+  provider?: string;
+  enabled?: boolean;
+  apiUrl?: string;
+  instanceId?: string;
+  apiToken?: string;
+  chatId?: string;
+  timeout?: number;
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export class ConfigLoader {
-  load(projectConfig: PartialProjectConfig): NotifierConfig {
-    const notifierConfig = projectConfig?.notifier;
+  private readonly configPath: string;
+  private readonly fs: any;
 
-    if (!notifierConfig) {
-      throw new ConfigError('Missing notifier config in opencode.json');
+  constructor(configPath?: string, fs?: any) {
+    if (configPath) {
+      this.configPath = configPath;
+    } else {
+      this.configPath = path.join(__dirname, 'config.json');
+    }
+    this.fs = fs;
+  }
+
+  private getFs() {
+    if (this.fs) {
+      return this.fs;
+    }
+    return import('fs/promises');
+  }
+
+  async load(): Promise<NotifierConfig> {
+    let config: WhatsAppConfigFile;
+
+    const fs = await this.getFs();
+
+    try {
+      const configContent = await fs.readFile(this.configPath, 'utf-8');
+      config = JSON.parse(configContent);
+    } catch (e: any) {
+      if (e.code === 'ENOENT') {
+        throw new ConfigError(`Config file not found at ${this.configPath}. Create a config.json file in the plugin directory.`);
+      }
+      if (e instanceof SyntaxError) {
+        throw new ConfigError(`Invalid JSON in config file at ${this.configPath}`);
+      }
+      throw new ConfigError(`Failed to read config file: ${e.message}`);
     }
 
-    if (notifierConfig.provider !== 'whatsapp-greenapi') {
-      throw new ConfigError(`Unsupported provider: ${notifierConfig.provider}`);
+    if (!config) {
+      throw new ConfigError('Config file is empty');
     }
 
-    if (!notifierConfig.enabled) {
-      return { provider: 'whatsapp-greenapi', enabled: false, fallbackConfigPath: '' };
+    if (config.provider !== 'whatsapp-greenapi') {
+      throw new ConfigError(`Unsupported provider: ${config.provider}`);
     }
 
-    const apiUrl = notifierConfig.apiUrl?.trim();
-    const instanceId = notifierConfig.instanceId?.trim();
-    const apiToken = notifierConfig.apiToken?.trim();
-    const chatId = notifierConfig.chatId?.trim();
+    if (!config.enabled) {
+      return { provider: 'whatsapp-greenapi', enabled: false, fallbackConfigPath: this.configPath };
+    }
+
+    const apiUrl = config.apiUrl?.trim();
+    const instanceId = config.instanceId?.trim();
+    const apiToken = config.apiToken?.trim();
+    const chatId = config.chatId?.trim();
 
     if (!apiUrl || !instanceId || !apiToken || !chatId) {
       throw new ConfigError('Missing required WhatsApp config fields: apiUrl, instanceId, apiToken, chatId');
@@ -44,7 +82,7 @@ export class ConfigLoader {
       throw new ConfigError('Invalid apiUrl format: must be a valid URL');
     }
 
-    const timeout = notifierConfig.timeout ?? 10000;
+    const timeout = config.timeout ?? 10000;
     if (timeout <= 0) {
       throw new ConfigError('Invalid timeout: must be a positive number');
     }
@@ -56,7 +94,8 @@ export class ConfigLoader {
       instanceId,
       apiToken,
       chatId,
-      timeout
+      timeout,
+      fallbackConfigPath: this.configPath
     };
   }
 }

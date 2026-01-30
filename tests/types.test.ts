@@ -1,5 +1,6 @@
+import { describe, it, expect } from 'bun:test';
 import { ConfigError, ProviderError, TransportError } from '../src/types/errors';
-import { NotificationPayload, NotifierProvider, WhatsAppConfig, FallbackConfigPath, ValidationResult } from '../src/types/notifier';
+import type { NotificationPayload, NotifierProvider, WhatsAppConfig, FallbackConfigPath, ValidationResult } from '../src/types/notifier';
 
 describe('Error Types', () => {
   it('ConfigError should have correct message', () => {
@@ -109,10 +110,12 @@ describe('Notifier Types', () => {
       instanceId: 'instance-123',
       apiToken: 'token-abc',
       chatId: '1234567890',
-      timeout: 5000
+      timeout: 5000,
+      fallbackConfigPath: '/test/config.json'
     };
     expect(config.provider).toBe('whatsapp-greenapi');
     expect(config.timeout).toBe(5000);
+    expect(config.fallbackConfigPath).toBe('/test/config.json');
   });
 
   it('FallbackConfigPath should have correct structure', () => {

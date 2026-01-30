@@ -1,6 +1,6 @@
 {
   "name": "opencode-whatsapp-notification",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "description": "OpenCode plugin that sends WhatsApp notifications on session completion and permission requests using Green-API.",
   "main": "src/index.ts",
   "module": "src/index.ts",
@@ -25,12 +25,11 @@
   "devDependencies": {
     "@opencode-ai/plugin": "latest",
     "@types/bun": "^1.3.8",
-    "@types/jest": "^30.0.0",
     "bun-types": "latest",
     "typescript": "latest"
   },
   "scripts": {
-    "test": "bun test",
+    "test": "bun test --timeout 10000",
     "typecheck": "tsc --noEmit"
   }
 }

@@ -12,42 +12,54 @@ OpenCode plugin that sends WhatsApp notifications on session completion and perm
 
 ## Installation
 
-Clone the repository:
+Clone locally:
 
 ```bash
 git clone <repo-url>
 cd opencode-whatsapp-notification
-bun install
 ```
 
-Then add it to your `opencode.json`:
+Drop plugin files in `.opencode/plugin/`:
 
-```json
-{
-  "plugin": ["/path/to/your/local/opencode-whatsapp-notification"]
-}
+```bash
+# For project-level plugins
+mkdir -p .opencode/plugin/opencode-whatsapp-notification
+cp -r src/* .opencode/plugin/opencode-whatsapp-notification/
+
+# OR for global plugins
+mkdir -p ~/.config/opencode/plugin/opencode-whatsapp-notification
+cp -r src/* ~/.config/opencode/plugin/opencode-whatsapp-notification/
 ```
+
+OpenCode loads all TypeScript files from `.opencode/plugin/` directory.
 
 ## Configuration
 
-Create a configuration in your `opencode.json`:
+After installing the plugin, copy `example.config.json` to `config.json` in the plugin directory and fill in your Green-API credentials:
+
+```bash
+# For project-level plugins
+cd .opencode/plugin/opencode-whatsapp-notification
+cp example.config.json config.json
+# Edit config.json with your credentials
+
+# OR for global plugins
+cd ~/.config/opencode/plugin/opencode-whatsapp-notification
+cp example.config.json config.json
+# Edit config.json with your credentials
+```
 
 ```json
 {
-  "plugin": ["/path/to/your/local/opencode-whatsapp-notification"],
-  "notifier": {
-    "provider": "whatsapp-greenapi",
-    "enabled": true,
-    "apiUrl": "https://api.green-api.com",
-    "instanceId": "YOUR_INSTANCE_ID",
-    "apiToken": "YOUR_API_TOKEN",
-    "chatId": "YOUR_PHONE_NUMBER@c.us",
-    "timeout": 10000
-  }
+  "provider": "whatsapp-greenapi",
+  "enabled": true,
+  "apiUrl": "https://api.green-api.com",
+  "instanceId": "YOUR_INSTANCE_ID",
+  "apiToken": "YOUR_API_TOKEN",
+  "chatId": "YOUR_PHONE_NUMBER@c.us",
+  "timeout": 10000
 }
 ```
-
-Get your Green-API credentials from https://green-api.com.
 
 ### Configuration Fields
 
@@ -58,6 +70,8 @@ Get your Green-API credentials from https://green-api.com.
 - `apiToken`: Your Green-API API token
 - `chatId`: Your phone number in WhatsApp format (e.g., `11001100110@c.us`)
 - `timeout`: Optional HTTP timeout in milliseconds (default: 10000)
+
+Get your Green-API credentials from https://green-api.com.
 
 ## Development
 

@@ -10,7 +10,7 @@ export const WhatsAppNotificationPlugin: Plugin = async ({ client, project }) =>
   let config;
 
   try {
-    config = await loader.load((project as any).config);
+    config = await loader.load();
   } catch (e: any) {
     await client.app.log({
       body: {
