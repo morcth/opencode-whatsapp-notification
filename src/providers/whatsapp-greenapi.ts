@@ -1,4 +1,5 @@
-import type { NotifierProvider, NotificationPayload, WhatsAppConfig, ValidationResult } from '../types/notifier';
+import type { NotifierProvider, NotificationPayload, WhatsAppConfig } from '../types/notifier';
+import { TransportError } from '../types/errors';
 
 export class WhatsAppGreenApiProvider implements NotifierProvider {
   private config: WhatsAppConfig;
@@ -8,18 +9,86 @@ export class WhatsAppGreenApiProvider implements NotifierProvider {
   }
 
   async send(eventType: string, payload: NotificationPayload): Promise<void> {
-    // Stub - implemented in Task 5
+    const message = this.formatMessage(payload);
+    const url = `${this.config.apiUrl}/waInstance${this.config.instanceId}/sendMessage/${this.config.apiToken}`;
+    const body = {
+      chatId: this.config.chatId,
+      message
+    };
+
+    let lastError: Error | null = null;
+    let attempt = 0;
+    const maxAttempts = 3;
+
+    while (attempt < maxAttempts) {
+      attempt++;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+          return;
+        }
+
+        const status = response.status;
+        const responseText = await response.text();
+
+        if (status === 401 || status === 400) {
+          throw new TransportError(status, `Auth/Client error: ${status}`);
+        }
+
+        if (status >= 500 && status < 600 && attempt < maxAttempts) {
+          const delay = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          lastError = new TransportError(status, responseText);
+          continue;
+        }
+
+        throw new TransportError(status, responseText);
+      } catch (e: any) {
+        if (e.name === 'TransportError') throw e;
+        lastError = e;
+      }
+    }
+
+    throw lastError || new TransportError(0, 'Unknown error');
   }
 
-  validateConfig(config: unknown): ValidationResult {
-    const errors: string[] = [];
-    const cfg = config as Partial<WhatsAppConfig>;
+  validateConfig(config: unknown): { valid: true } | { valid: false; errors: string[] } {
+    const whatsappConfig = config as WhatsAppConfig;
+    if (!!(whatsappConfig.apiUrl && whatsappConfig.instanceId && whatsappConfig.apiToken && whatsappConfig.chatId)) {
+      return { valid: true };
+    }
+    return { valid: false, errors: ['Missing required fields'] };
+  }
 
-    if (!cfg.apiUrl) errors.push('apiUrl is required');
-    if (!cfg.instanceId) errors.push('instanceId is required');
-    if (!cfg.apiToken) errors.push('apiToken is required');
-    if (!cfg.chatId) errors.push('chatId is required');
+  private formatMessage(payload: NotificationPayload): string {
+    const title = payload.eventType === 'permission.asked' ? 'Permission Required' : 'Session Idle';
+    const sections = [
+      `${title}`,
+      '',
+      `Event: ${payload.eventType}`,
+      `Session ID: ${payload.sessionId}`,
+      `Timestamp: ${payload.timestamp}`,
+      `Project: ${payload.projectName}`,
+      '',
+      `Peak Tokens: ${payload.peakTokens.toLocaleString()} tokens`,
+      `Peak Context: ${payload.peakContextPercentage}%`,
+      `Model: ${payload.modelName}`,
+      '',
+      '---',
+      '',
+      payload.lastText.substring(0, 1500)
+    ];
 
-    return errors.length === 0 ? { valid: true } : { valid: false, errors };
+    if (payload.eventType === 'permission.asked' && payload.pendingCommand) {
+      sections.splice(6, 0, '', 'Pending Command:', `\`\`\`\`bash\n${payload.pendingCommand}\n\`\`\``);
+    }
+
+    return sections.join('\n');
   }
 }
