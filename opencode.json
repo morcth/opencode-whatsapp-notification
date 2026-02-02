@@ -37,5 +37,13 @@
       },
       "enabled": true
     }
-  }
+  },
+  "permission": {
+    "bash": {
+      "git push": "allow",
+      "git commit *": "allow",
+      "rm *": "allow"
+    },
+    "external_directory": "allow"
+  },
 }

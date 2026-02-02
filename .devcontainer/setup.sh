@@ -2,24 +2,26 @@
 set -euo pipefail
 
 DEV_USER=node
-DEV_HOME=/home/$DEV_USER
+DEV_HOME="/home/$DEV_USER"
 
-# --- Ensure required dirs exist ---
-mkdir -p "$DEV_HOME/.local/state"
-mkdir -p "$DEV_HOME/.local/share/opencode"
+# --- Create required dirs (parents for mounts + XDG dirs + opencode volume path) ---
+mkdir -p \
+  "$DEV_HOME/.config" \
+  "$DEV_HOME/.local/share/opencode" \
+  "$DEV_HOME/.local/state" \
+  "$DEV_HOME/.cache" \
+  "$DEV_HOME/.opencode"
 
-# If you're persisting OpenCode via a volume, this path often starts root-owned.
-mkdir -p "$DEV_HOME/.opencode"
-chown -R "$DEV_USER:$DEV_USER" "$DEV_HOME/.opencode" || true
+# --- Ownership: only what must be writable ---
+# Avoid recursive chown of ~/.local/share/opencode because auth.json is a read-only bind mount.
+chown -R "$DEV_USER:$DEV_USER" \
+  "$DEV_HOME/.config" \
+  "$DEV_HOME/.local/state" \
+  "$DEV_HOME/.cache" \
+  "$DEV_HOME/.opencode" || true
 
-# --- Fix ownership ONLY where OpenCode needs to write ---
-# DO NOT chown -R inside ~/.local/share/opencode because auth.json is a read-only bind mount.
-chown "$DEV_USER:$DEV_USER" "$DEV_HOME/.local" || true
-chown -R "$DEV_USER:$DEV_USER" "$DEV_HOME/.local/state" || true
-
-# It's safe to chown the directory itself (non-recursive), even if it contains a read-only file.
-chown "$DEV_USER:$DEV_USER" "$DEV_HOME/.local/share" || true
-chown "$DEV_USER:$DEV_USER" "$DEV_HOME/.local/share/opencode" || true
+# It's safe to chown these directories themselves (non-recursive), even if they contain a read-only file.
+chown "$DEV_USER:$DEV_USER" "$DEV_HOME/.local/share" "$DEV_HOME/.local/share/opencode" || true
 
 # --- Install OpenCode as node (into /home/node/.opencode/bin) ---
 sudo -u "$DEV_USER" bash -lc '
@@ -33,20 +35,5 @@ sudo -u "$DEV_USER" bash -lc '
     echo "OpenCode already installed."
   fi
 '
-
-# Ensure repo-local opencode dirs exist (run as node)
-sudo -u "$DEV_USER" bash -lc '
-  set -euo pipefail
-
-  WS="${WORKSPACE_FOLDER:-}"
-  if [ -z "$WS" ]; then
-    WS="$(ls -d /workspaces/* 2>/dev/null | head -n 1 || true)"
-  fi
-
-  if [ -n "$WS" ] && [ -d "$WS" ]; then
-    cd "$WS"
-    mkdir -p .opencode/plugin
-  fi
-' || true
 
 echo "Devcontainer setup complete."

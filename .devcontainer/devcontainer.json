@@ -8,11 +8,16 @@
   ],
   "postCreateCommand": "sudo bash .devcontainer/setup.sh",
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/node/.opencode/bin"
+    "PATH": "${containerEnv:PATH}:/home/node/.opencode/bin",
+    "XDG_CONFIG_HOME": "/home/node/.config",
+    "XDG_DATA_HOME": "/home/node/.local/share",
+    "XDG_STATE_HOME": "/home/node/.local/state",
+    "XDG_CACHE_HOME": "/home/node/.cache"
   },
   "mounts": [
     "source=opencode-data,target=/home/node/.opencode,type=volume",
     "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/node/.local/share/opencode/auth.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/opencode,target=/home/node/.config/opencode,type=bind,readonly",
     "source=${localEnv:HOME}/.oh-my-zsh,target=/home/node/.oh-my-zsh,type=bind,readonly",
     "source=${localEnv:HOME}/.zshrc,target=/home/node/.zshrc,type=bind,readonly",
     "source=${localEnv:HOME}/.rbenv,target=/home/node/.rbenv,type=bind,readonly"
