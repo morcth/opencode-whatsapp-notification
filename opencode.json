@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "tui": {
+    "show_thinking": false
+  },
+  "agent": {
+    "planner": {
+      "mode": "subagent",
+      "model": "openai/gpt-5.2-codex",
+      "description": "Planning and design specialist"
+    },
+    "coder": {
+      "mode": "subagent",
+      "model": "zai-coding-plan/glm-4.7",
+      "description": "Implementation and coding specialist"
+    },
+    "superpowers:code-reviewer": {
+      "mode": "subagent",
+      "model": "openai/gpt-5.2-codex",
+      "description": "Superpowers code reviewer (planner model)"
+    },
+    "plan": {
+      "model": "openai/gpt-5.2-codex",
+      "description": "Planning and design specialist"
+    },
+    "build": {
+      "model": "zai-coding-plan/glm-4.7",
+      "description": "Planning and design specialist"
+    }
+  },
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-30f2a36f-ab99-4ffb-ae77-5b8bc8184392"
+      },
+      "enabled": true
+    }
+  }
+}

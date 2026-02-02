@@ -1,0 +1,42 @@
+{
+  "name": "work-repo-sandbox",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "forwardPorts": [3333],
+  "runArgs": [
+    "-p", "127.0.0.1:9899:9899",
+    "-p", "100.120.78.92:9899:9899"
+  ],
+  "postCreateCommand": "sudo bash .devcontainer/setup.sh",
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/home/node/.opencode/bin"
+  },
+  "mounts": [
+    "source=opencode-data,target=/home/node/.opencode,type=volume",
+    "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/node/.local/share/opencode/auth.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.oh-my-zsh,target=/home/node/.oh-my-zsh,type=bind,readonly",
+    "source=${localEnv:HOME}/.zshrc,target=/home/node/.zshrc,type=bind,readonly",
+    "source=${localEnv:HOME}/.rbenv,target=/home/node/.rbenv,type=bind,readonly"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bierner.markdown-mermaid",
+        "bradlc.vscode-tailwindcss",
+        "csstools.postcss",
+        "mechatroner.rainbow-csv",
+        "ms-azuretools.vscode-containers",
+        "ms-playwright.playwright",
+        "ms-vscode-remote.remote-containers",
+        "pimzino.spec-workflow-mcp",
+        "rooveterinaryinc.roo-cline",
+        "sarahridge.vscode-ruby-syntax",
+        "simonsiefke.svg-preview",
+        "sst-dev.opencode",
+        "vue.volar"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  }
+}
