@@ -1,9 +1,19 @@
 {
-  "provider": "whatsapp-greenapi",
   "enabled": true,
-  "apiUrl": "https://api.green-api.com",
-  "instanceId": "YOUR_INSTANCE_ID",
-  "apiToken": "YOUR_API_TOKEN",
-  "chatId": "YOUR_PHONE_NUMBER@c.us",
-  "timeout": 10000
+  "providers": {
+    "discord": {
+      "enabled": true,
+      "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN",
+      "username": "OpenCode Notifier",
+      "avatarUrl": "https://example.com/your-avatar.png"
+    },
+    "whatsapp-greenapi": {
+      "enabled": true,
+      "apiUrl": "https://api.green-api.com",
+      "instanceId": "YOUR_INSTANCE_ID",
+      "apiToken": "YOUR_API_TOKEN",
+      "chatId": "YOUR_PHONE_NUMBER@c.us",
+      "timeout": 10000
+    }
+  }
 }
