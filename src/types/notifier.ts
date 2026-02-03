@@ -17,6 +17,14 @@ export interface NotifierProvider {
   validateConfig?(config: unknown): ValidationResult;
 }
 
+export interface DiscordConfig {
+  provider: 'discord';
+  enabled: boolean;
+  webhookUrl: string;
+  username?: string;
+  avatarUrl?: string;
+}
+
 export interface WhatsAppConfig {
   provider: 'whatsapp-greenapi';
   enabled: boolean;
