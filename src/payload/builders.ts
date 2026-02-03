@@ -1,9 +1,6 @@
 import type { NotificationPayload } from '../types/notifier';
 
 export function buildSessionIdlePayload(session: any, messages: any[], project: any): NotificationPayload {
-  console.log('[PayloadBuilder] Session keys:', Object.keys(session || {}));
-  console.log('[PayloadBuilder] Session.id:', session.id, 'session.properties:', session.properties);
-  console.log('[PayloadBuilder] Messages count:', messages.length);
   
   const sessionId = session.id || session.properties?.sessionID || session.properties?.id;
   const modelName = session.model?.name || messages[messages.length - 1]?.info?.modelID || 'Unknown';
@@ -61,7 +58,6 @@ export function buildPermissionAskedPayload(session: any, messages: any[], proje
     }
   }
 
-  console.log('[PayloadBuilder] Permission payload, pendingCommand:', pendingCommand ? pendingCommand.substring(0, 500) : 'none');
   
   return {
     ...basePayload,

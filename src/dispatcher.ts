@@ -7,7 +7,6 @@ export async function dispatchNotification(
   payload: NotificationPayload
 ): Promise<void> {
   if (providers.length === 0) {
-    console.log('[Multi-Notifier] No providers enabled, skipping notification');
     await Promise.resolve();
     return;
   }
@@ -21,7 +20,6 @@ export async function dispatchNotification(
     if (!provider) return;
 
     if (result.status === 'fulfilled') {
-      console.log(`[Multi-Notifier] ${provider.name}: SUCCESS`);
       client.app.log({
         body: {
           service: 'multi-notifier',

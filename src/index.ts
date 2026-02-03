@@ -32,15 +32,12 @@ export const MultiNotificationPlugin: Plugin = async ({ client, project }) => {
   return {
     event: async ({ event }) => {
       try {
-        console.log('[Multi-Notifier] Event type:', event.type);
-        console.log('[Multi-Notifier] Event properties keys:', Object.keys(event.properties || {}));
 
         if (event.type === 'session.idle') {
           await handleNotification(providers, client, project, event, 'idle');
         } else if ((event.type as string) === 'permission.asked') {
           await handleNotification(providers, client, project, event, 'permission');
         } else {
-          console.log('[Multi-Notifier] Ignoring event type:', event.type);
         }
       } catch (e: any) {
         console.error('[Multi-Notifier] Error:', e);
@@ -64,18 +61,14 @@ async function handleNotification(
   type: 'idle' | 'permission'
 ) {
   const sessionId = event.properties?.sessionID || event.properties?.id;
-  console.log('[Multi-Notifier] Processing notification, sessionId:', sessionId, 'type:', type);
   if (!sessionId) {
-    console.log('[Multi-Notifier] No sessionId found, skipping');
     return;
   }
 
   if (type === 'idle') {
-    console.log('[Multi-Notifier] Waiting 1.5s for idle event...');
     await new Promise(resolve => setTimeout(resolve, 1500));
   }
 
-  console.log('[Multi-Notifier] Fetching session and messages...');
   const [sRes, mRes] = await Promise.all([
     client.session.get({ path: { id: sessionId } }),
     client.session.messages({ path: { id: sessionId } })
@@ -83,15 +76,12 @@ async function handleNotification(
 
   const session = (sRes as any).data || sRes;
   const messages = (mRes as any).data || mRes || [];
-  console.log('[Multi-Notifier] Session:', session ? 'found' : 'not found', 'Messages:', messages.length);
 
   const payload = type === 'idle'
     ? buildSessionIdlePayload(session, messages, project)
     : buildPermissionAskedPayload(session, messages, project);
 
-  console.log('[Multi-Notifier] Dispatching notification to', providers.length, 'provider(s)...');
   await dispatchNotification(client, providers, type === 'idle' ? 'session.idle' : 'permission.asked', payload);
-  console.log('[Multi-Notifier] Notification dispatch complete');
 }
 
 export default MultiNotificationPlugin;

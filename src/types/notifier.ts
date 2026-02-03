@@ -36,14 +36,9 @@ export interface WhatsAppConfig {
   timeout?: number;
 }
 
-export interface DisabledWhatsAppConfig {
-  provider: 'whatsapp-greenapi';
-  enabled: false;
-}
-
 export interface MultiProviderConfig {
   enabled: boolean;
   providers: Record<string, WhatsAppConfig | DiscordConfig>;
 }
 
-export type NotifierConfig = WhatsAppConfig | DisabledWhatsAppConfig | DiscordConfig | MultiProviderConfig;
+export type NotifierConfig = MultiProviderConfig;

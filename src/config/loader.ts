@@ -37,7 +37,6 @@ export class ConfigLoader {
     } else {
       this.configPath = path.join(__dirname, 'config.json');
     }
-    console.log('[ConfigLoader] Loading config from:', this.configPath);
     this.fs = fs;
   }
 
@@ -139,7 +138,6 @@ export class ConfigLoader {
     }
 
     if (Object.keys(providers).length === 0) {
-      console.log('[Multi-Notifier] All providers disabled, no notifications will be sent');
       return { enabled: true, providers: {} };
     }
 

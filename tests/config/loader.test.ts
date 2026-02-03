@@ -231,9 +231,7 @@ describe('ConfigLoader', () => {
       await expect(loader.load()).rejects.toThrow('Discord config validation failed');
     });
 
-    it('should log info message when all providers disabled', async () => {
-      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
+    it('should handle all providers disabled', async () => {
       const mockFs = mockReadFile(JSON.stringify({
         enabled: true,
         providers: {
@@ -256,9 +254,6 @@ describe('ConfigLoader', () => {
 
       expect(config.enabled).toBe(true);
       expect((config as any).providers).toEqual({});
-      expect(console.log).toHaveBeenCalledWith('[Multi-Notifier] All providers disabled, no notifications will be sent');
-
-      logSpy.mockRestore();
     });
   });
 });
