@@ -1,17 +1,16 @@
 import * as path from 'path';
-import * as url from 'url';
 import { fileURLToPath } from 'url';
-import type { NotifierConfig } from '../types/notifier';
+import type { NotifierConfig, MultiProviderConfig, WhatsAppConfig, DiscordConfig } from '../types/notifier';
 import { ConfigError } from '../types/errors';
+import { DiscordProvider } from '../providers/discord';
+import { WhatsAppGreenApiProvider } from '../providers/whatsapp-greenapi';
 
-interface WhatsAppConfigFile {
-  provider?: string;
+interface MultiProviderConfigFile {
   enabled?: boolean;
-  apiUrl?: string;
-  instanceId?: string;
-  apiToken?: string;
-  chatId?: string;
-  timeout?: number;
+  providers?: {
+    discord?: Partial<DiscordConfig>;
+    'whatsapp-greenapi'?: Partial<WhatsAppConfig>;
+  };
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +38,7 @@ export class ConfigLoader {
   }
 
   async load(): Promise<NotifierConfig> {
-    let config: WhatsAppConfigFile;
+    let config: any;
 
     const fs = await this.getFs();
 
@@ -48,7 +47,7 @@ export class ConfigLoader {
       config = JSON.parse(configContent);
     } catch (e: any) {
       if (e.code === 'ENOENT') {
-        throw new ConfigError(`Config file not found at ${this.configPath}. Create a config.json file in the plugin directory.`);
+        throw new ConfigError(`Config file not found at ${this.configPath}. Create a config.json file in plugin directory.`);
       }
       if (e instanceof SyntaxError) {
         throw new ConfigError(`Invalid JSON in config file at ${this.configPath}`);
@@ -60,44 +59,66 @@ export class ConfigLoader {
       throw new ConfigError('Config file is empty');
     }
 
-    if (config.provider !== 'whatsapp-greenapi') {
-      throw new ConfigError(`Unsupported provider: ${config.provider}`);
+    const enabled = config.enabled ?? true;
+
+    if (!enabled) {
+      return { enabled: false } as NotifierConfig;
     }
 
-    if (!config.enabled) {
-      return { provider: 'whatsapp-greenapi', enabled: false };
+    if (config.providers) {
+      return this.loadMultiProviderConfig(config);
     }
 
-    const apiUrl = config.apiUrl?.trim();
-    const instanceId = config.instanceId?.trim();
-    const apiToken = config.apiToken?.trim();
-    const chatId = config.chatId?.trim();
+    throw new ConfigError('Invalid config: must have providers object');
+  }
 
-    if (!apiUrl || !instanceId || !apiToken || !chatId) {
-      throw new ConfigError('Missing required WhatsApp config fields: apiUrl, instanceId, apiToken, chatId');
+  private loadMultiProviderConfig(config: any): MultiProviderConfig {
+    const providers: any = {};
+
+    if (config.providers.discord) {
+      const discordConfig = config.providers.discord;
+      const validation = new DiscordProvider(discordConfig as DiscordConfig).validateConfig(discordConfig);
+
+      if (!validation.valid) {
+        throw new ConfigError(`Discord config validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      providers.discord = {
+        provider: 'discord',
+        enabled: discordConfig.enabled ?? true,
+        webhookUrl: discordConfig.webhookUrl,
+        username: discordConfig.username,
+        avatarUrl: discordConfig.avatarUrl
+      };
     }
 
-    try {
-      new URL(apiUrl);
-    } catch {
-      throw new ConfigError('Invalid apiUrl format: must be a valid URL');
+    if (config.providers['whatsapp-greenapi']) {
+      const whatsappConfig = config.providers['whatsapp-greenapi'];
+      const validation = new WhatsAppGreenApiProvider(whatsappConfig as WhatsAppConfig).validateConfig(whatsappConfig);
+
+      if (!validation.valid) {
+        throw new ConfigError(`WhatsApp config validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      providers['whatsapp-greenapi'] = {
+        provider: 'whatsapp-greenapi',
+        enabled: whatsappConfig.enabled ?? true,
+        apiUrl: whatsappConfig.apiUrl,
+        instanceId: whatsappConfig.instanceId,
+        apiToken: whatsappConfig.apiToken,
+        chatId: whatsappConfig.chatId,
+        timeout: whatsappConfig.timeout ?? 10000
+      };
     }
 
-    const timeout = config.timeout ?? 10000;
-    if (timeout <= 0) {
-      throw new ConfigError('Invalid timeout: must be a positive number');
+    if (Object.keys(providers).length === 0) {
+      console.log('[Multi-Notifier] All providers disabled, no notifications will be sent');
+      return { enabled: true, providers: {} };
     }
 
-    const result = {
-      provider: 'whatsapp-greenapi' as const,
+    return {
       enabled: true,
-      apiUrl,
-      instanceId,
-      apiToken,
-      chatId,
-      timeout
+      providers
     };
-    console.log('[ConfigLoader] Config loaded successfully, enabled:', result.enabled, 'chatId:', chatId);
-    return result;
   }
 }

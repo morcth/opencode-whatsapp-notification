@@ -199,4 +199,64 @@ describe('ConfigLoader', () => {
     const loader = new ConfigLoader('/test/config.json', mockFs);
     await expect(loader.load()).rejects.toThrow(ConfigError);
   });
+
+  describe('Multi-provider config validation', () => {
+    it('should load valid multi-provider config', async () => {
+      const mockFs = mockReadFile(JSON.stringify({
+        enabled: true,
+        providers: {
+          discord: {
+            enabled: true,
+            webhookUrl: 'https://discord.com/api/webhooks/test',
+            username: 'TestBot'
+          },
+          'whatsapp-greenapi': {
+            enabled: true,
+            apiUrl: 'https://api.green-api.com',
+            instanceId: '123',
+            apiToken: 'test',
+            chatId: '11001100110@c.us'
+          }
+        }
+      }));
+
+      const loader = new ConfigLoader(undefined, mockFs);
+      const config = await loader.load();
+
+      expect(config.enabled).toBe(true);
+      expect('providers' in config).toBe(true);
+      expect((config as any).providers?.discord?.webhookUrl).toBeDefined();
+    });
+
+    it('should throw ConfigError for invalid Discord webhook URL', async () => {
+      const mockFs = mockReadFile(JSON.stringify({
+        enabled: true,
+        providers: {
+          discord: {
+            enabled: true,
+            webhookUrl: 'https://not-discord.com/webhook'
+          }
+        }
+      }));
+
+      const loader = new ConfigLoader(undefined, mockFs);
+
+      await expect(loader.load()).rejects.toThrow('Discord config validation failed');
+    });
+
+    it('should throw ConfigError for partial provider config (missing fields)', async () => {
+      const mockFs = mockReadFile(JSON.stringify({
+        enabled: true,
+        providers: {
+          discord: {
+            enabled: true
+          }
+        }
+      }));
+
+      const loader = new ConfigLoader(undefined, mockFs);
+
+      await expect(loader.load()).rejects.toThrow('Discord config validation failed');
+    });
+  });
 });
