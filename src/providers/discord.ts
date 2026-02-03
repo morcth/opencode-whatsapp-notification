@@ -1,5 +1,13 @@
 import type { NotifierProvider, NotificationPayload, DiscordConfig } from '../types/notifier';
 
+interface DiscordEmbed {
+  title: string;
+  color: number;
+  fields: Array<{ name: string; value: string; inline: boolean }>;
+  footer: { text: string };
+  timestamp: string;
+}
+
 export class DiscordProvider implements NotifierProvider {
   name = 'Discord';
   private config: DiscordConfig;
@@ -28,7 +36,7 @@ export class DiscordProvider implements NotifierProvider {
     }
   }
 
-  private formatEmbed(eventType: string, payload: NotificationPayload): any {
+  private formatEmbed(eventType: string, payload: NotificationPayload): DiscordEmbed {
     const color = payload.eventType === 'session.idle' ? 0x00ff00 : 0xffa500;
     const title = payload.eventType === 'session.idle' ? 'Session Idle' : 'Permission Required';
 
