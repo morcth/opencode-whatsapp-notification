@@ -11,10 +11,25 @@ OpenCode plugin that sends notifications to Discord and/or WhatsApp when AI sess
 
 ## Installation
 
-1. Copy this plugin to your OpenCode plugins directory
-2. Create `config.json` in plugin directory
+```bash
+cd ~/.config/opencode/plugins
+git clone https://github.com/your-repo/opencode-multi-notification
+cp opencode-multi-notification/src/example.config.json opencode-multi-notification/config.json
+```
 
 ## Configuration
+
+### Creating Your Config
+
+1. Copy example configuration:
+```bash
+cp src/example.config.json config.json
+```
+
+2. Edit `config.json` with your actual values:
+   - Replace Discord webhook URL
+   - Replace WhatsApp instance ID and API token
+   - Replace phone number
 
 ### Example Configuration
 
@@ -85,11 +100,15 @@ Sent when an AI session completes. Includes:
 - Last message preview
 - **Discord**: Green embed (0x00ff00)
 
+These colors provide visual distinction in Discord - green for successful completion, orange for attention-required permission requests.
+
 ### Permission Asked
 
 Sent when AI needs user permission for an action. Includes all session data plus:
 - Pending command
 - **Discord**: Orange embed (0xffa500)
+
+These colors provide visual distinction in Discord - green for successful completion, orange for attention-required permission requests.
 
 ## Testing
 
@@ -103,3 +122,22 @@ bun test
 bun run typecheck  # Type checking
 bun test           # Run tests
 ```
+
+## Troubleshooting
+
+### Discord not receiving notifications
+
+- Verify webhook URL is correct and valid
+- Check webhook is active in Discord server settings
+- Ensure bot has permissions to send webhooks to the channel
+
+### WhatsApp not receiving notifications
+
+- Verify instance ID and API token are correct
+- Check your phone number is saved as a contact in Green-API
+- Ensure chat ID format is `NUMBER@c.us` (example: `15551234567@c.us`)
+
+### Multiple providers failing
+
+- Check OpenCode logs for specific error messages
+- Verify each provider's configuration is valid
