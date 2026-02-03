@@ -10,8 +10,7 @@ describe('ProviderRegistry', () => {
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
       apiToken: 'test-token',
-      chatId: '11001100110@c.us',
-      fallbackConfigPath: '/test/config.json'
+      chatId: '11001100110@c.us'
     };
     const provider = ProviderRegistry.getProvider(config);
     expect(provider).toBeDefined();
@@ -22,9 +21,8 @@ describe('ProviderRegistry', () => {
   it('should throw ProviderError for unknown provider', () => {
     const config = {
       provider: 'unknown-provider' as any,
-      enabled: true,
-      fallbackConfigPath: '/test/config.json'
-    };
+      enabled: true
+    } as any;
     expect(() => ProviderRegistry.getProvider(config)).toThrow(ProviderError);
   });
 });

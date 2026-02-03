@@ -8,14 +8,12 @@ const mockConfig = {
   instanceId: '12345',
   apiToken: 'test-token',
   chatId: '11001100110@c.us',
-  timeout: 10000,
-  fallbackConfigPath: '/test/config.json'
+  timeout: 10000
 };
 
-const mockDisabledConfig = {
-  provider: 'whatsapp-greenapi' as const,
-  enabled: false,
-  fallbackConfigPath: '/test/config.json'
+const mockDisabledConfig: { provider: 'whatsapp-greenapi'; enabled: false } = {
+  provider: 'whatsapp-greenapi',
+  enabled: false
 };
 
 function createMockClient() {

@@ -65,7 +65,7 @@ export class ConfigLoader {
     }
 
     if (!config.enabled) {
-      return { provider: 'whatsapp-greenapi', enabled: false, fallbackConfigPath: this.configPath };
+      return { provider: 'whatsapp-greenapi', enabled: false };
     }
 
     const apiUrl = config.apiUrl?.trim();
@@ -95,8 +95,7 @@ export class ConfigLoader {
       instanceId,
       apiToken,
       chatId,
-      timeout,
-      fallbackConfigPath: this.configPath
+      timeout
     };
     console.log('[ConfigLoader] Config loaded successfully, enabled:', result.enabled, 'chatId:', chatId);
     return result;

@@ -33,13 +33,11 @@ export interface WhatsAppConfig {
   apiToken: string;
   chatId: string;
   timeout?: number;
-  fallbackConfigPath: string;
 }
 
-export interface FallbackConfigPath {
+export interface DisabledWhatsAppConfig {
   provider: 'whatsapp-greenapi';
-  enabled: boolean;
-  fallbackConfigPath: string;
+  enabled: false;
 }
 
-export type NotifierConfig = WhatsAppConfig | FallbackConfigPath;
+export type NotifierConfig = WhatsAppConfig | DisabledWhatsAppConfig;
