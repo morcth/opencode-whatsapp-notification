@@ -14,17 +14,15 @@ OpenCode plugin that sends notifications to Discord and/or WhatsApp when AI sess
 ```bash
 cd ~/.config/opencode/plugins
 git clone https://github.com/your-repo/opencode-multi-notification
-cp opencode-multi-notification/src/example.config.json opencode-multi-notification/config.json
+cd opencode-multi-notification
+cp src/example.config.json config.json
 ```
 
 ## Configuration
 
 ### Creating Your Config
 
-1. Copy example configuration:
-```bash
-cp src/example.config.json config.json
-```
+The plugin is now installed. Edit `config.json` with your settings:
 
 2. Edit `config.json` with your actual values:
    - Replace Discord webhook URL
