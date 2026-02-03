@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect, beforeEach, vi } from 'bun:test';
 import { ConfigError } from '../../src/types/errors';
 
 const mockReadFile = (content: string | Error) => {
@@ -250,6 +250,7 @@ describe('ConfigLoader', () => {
         providers: {
           discord: {
             enabled: true
+            // Missing webhookUrl
           }
         }
       }));
@@ -257,6 +258,36 @@ describe('ConfigLoader', () => {
       const loader = new ConfigLoader(undefined, mockFs);
 
       await expect(loader.load()).rejects.toThrow('Discord config validation failed');
+    });
+
+    it('should log info message when all providers disabled', async () => {
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      const mockFs = mockReadFile(JSON.stringify({
+        enabled: true,
+        providers: {
+          discord: {
+            enabled: false,
+            webhookUrl: 'https://discord.com/api/webhooks/test'
+          },
+          'whatsapp-greenapi': {
+            enabled: false,
+            apiUrl: 'https://api.green-api.com',
+            instanceId: '123',
+            apiToken: 'test',
+            chatId: '11001100110@c.us'
+          }
+        }
+      }));
+
+      const loader = new ConfigLoader(undefined, mockFs);
+      const config = await loader.load();
+
+      expect(config.enabled).toBe(true);
+      expect((config as any).providers).toEqual({});
+      expect(console.log).toHaveBeenCalledWith('[Multi-Notifier] All providers disabled, no notifications will be sent');
+
+      logSpy.mockRestore();
     });
   });
 });

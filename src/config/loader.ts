@@ -77,38 +77,46 @@ export class ConfigLoader {
 
     if (config.providers.discord) {
       const discordConfig = config.providers.discord;
-      const validation = new DiscordProvider(discordConfig as DiscordConfig).validateConfig(discordConfig);
+      const enabled = discordConfig.enabled ?? true;
 
-      if (!validation.valid) {
-        throw new ConfigError(`Discord config validation failed: ${validation.errors.join(', ')}`);
+      if (enabled) {
+        const validation = new DiscordProvider(discordConfig as DiscordConfig).validateConfig(discordConfig);
+
+        if (!validation.valid) {
+          throw new ConfigError(`Discord config validation failed: ${validation.errors.join(', ')}`);
+        }
+
+        providers.discord = {
+          provider: 'discord',
+          enabled: true,
+          webhookUrl: discordConfig.webhookUrl,
+          username: discordConfig.username,
+          avatarUrl: discordConfig.avatarUrl
+        };
       }
-
-      providers.discord = {
-        provider: 'discord',
-        enabled: discordConfig.enabled ?? true,
-        webhookUrl: discordConfig.webhookUrl,
-        username: discordConfig.username,
-        avatarUrl: discordConfig.avatarUrl
-      };
     }
 
     if (config.providers['whatsapp-greenapi']) {
       const whatsappConfig = config.providers['whatsapp-greenapi'];
-      const validation = new WhatsAppGreenApiProvider(whatsappConfig as WhatsAppConfig).validateConfig(whatsappConfig);
+      const enabled = whatsappConfig.enabled ?? true;
 
-      if (!validation.valid) {
-        throw new ConfigError(`WhatsApp config validation failed: ${validation.errors.join(', ')}`);
+      if (enabled) {
+        const validation = new WhatsAppGreenApiProvider(whatsappConfig as WhatsAppConfig).validateConfig(whatsappConfig);
+
+        if (!validation.valid) {
+          throw new ConfigError(`WhatsApp config validation failed: ${validation.errors.join(', ')}`);
+        }
+
+        providers['whatsapp-greenapi'] = {
+          provider: 'whatsapp-greenapi',
+          enabled: true,
+          apiUrl: whatsappConfig.apiUrl,
+          instanceId: whatsappConfig.instanceId,
+          apiToken: whatsappConfig.apiToken,
+          chatId: whatsappConfig.chatId,
+          timeout: whatsappConfig.timeout ?? 10000
+        };
       }
-
-      providers['whatsapp-greenapi'] = {
-        provider: 'whatsapp-greenapi',
-        enabled: whatsappConfig.enabled ?? true,
-        apiUrl: whatsappConfig.apiUrl,
-        instanceId: whatsappConfig.instanceId,
-        apiToken: whatsappConfig.apiToken,
-        chatId: whatsappConfig.chatId,
-        timeout: whatsappConfig.timeout ?? 10000
-      };
     }
 
     if (Object.keys(providers).length === 0) {
