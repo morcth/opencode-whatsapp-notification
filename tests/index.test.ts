@@ -1,18 +1,27 @@
 import { vi, describe, it, expect, beforeEach } from 'bun:test';
-import { WhatsAppNotificationPlugin } from '../src/index';
+import { MultiNotificationPlugin } from '../src/index';
 
 const mockConfig = {
-  provider: 'whatsapp-greenapi' as const,
   enabled: true,
-  apiUrl: 'https://api.green-api.com',
-  instanceId: '12345',
-  apiToken: 'test-token',
-  chatId: '11001100110@c.us',
-  timeout: 10000
+  providers: {
+    discord: {
+      provider: 'discord',
+      enabled: true,
+      webhookUrl: 'https://discord.com/api/webhooks/test'
+    },
+    'whatsapp-greenapi': {
+      provider: 'whatsapp-greenapi',
+      enabled: true,
+      apiUrl: 'https://api.green-api.com',
+      instanceId: '12345',
+      apiToken: 'test-token',
+      chatId: '11001100110@c.us',
+      timeout: 10000
+    }
+  }
 };
 
-const mockDisabledConfig: { provider: 'whatsapp-greenapi'; enabled: false } = {
-  provider: 'whatsapp-greenapi',
+const mockDisabledConfig = {
   enabled: false
 };
 
@@ -46,7 +55,7 @@ function createMockFetch() {
   return mockFetch;
 }
 
-describe('WhatsAppNotificationPlugin', () => {
+describe('MultiNotificationPlugin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -58,7 +67,7 @@ describe('WhatsAppNotificationPlugin', () => {
     const mockClient = createMockClient();
     const mockProject = createMockProject();
 
-    const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+    const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
     expect(plugin.event).toBeDefined();
   });
@@ -74,7 +83,7 @@ describe('WhatsAppNotificationPlugin', () => {
     const mockFetch = createMockFetch();
     global.fetch = mockFetch;
 
-    const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+    const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
     await plugin.event!({
       event: {
@@ -110,7 +119,7 @@ describe('WhatsAppNotificationPlugin', () => {
       (mockFetch as any).preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -142,7 +151,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       const startTime = Date.now();
       await plugin.event!({
@@ -173,7 +182,7 @@ describe('WhatsAppNotificationPlugin', () => {
       (mockFetch as any).preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -206,7 +215,7 @@ describe('WhatsAppNotificationPlugin', () => {
       (mockFetch as any).preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -232,7 +241,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       const startTime = Date.now();
       await plugin.event!({
@@ -263,7 +272,7 @@ describe('WhatsAppNotificationPlugin', () => {
       (mockFetch as any).preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -286,11 +295,11 @@ describe('WhatsAppNotificationPlugin', () => {
       const mockClient = createMockClient();
       const mockProject = createMockProject();
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       expect(mockClient.app.log).toHaveBeenCalledWith({
         body: {
-          service: 'whatsapp-notifier',
+          service: 'multi-notifier',
           level: 'error',
           message: 'Config error: Invalid config',
         },
@@ -317,7 +326,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -328,9 +337,9 @@ describe('WhatsAppNotificationPlugin', () => {
 
       expect(mockClient.app.log).toHaveBeenCalledWith({
         body: {
-          service: 'whatsapp-notifier',
+          service: 'multi-notifier',
           level: 'error',
-          message: expect.any(String),
+          message: 'Notification error: Session fetch failed',
         },
       });
     });
@@ -349,7 +358,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -358,11 +367,19 @@ describe('WhatsAppNotificationPlugin', () => {
         }
       });
 
+      expect(mockClient.app.log).toHaveBeenCalledTimes(2);
       expect(mockClient.app.log).toHaveBeenCalledWith({
         body: {
-          service: 'whatsapp-notifier',
+          service: 'multi-notifier',
           level: 'error',
-          message: expect.any(String),
+          message: 'Discord: FAILED - Discord webhook failed: 401 Auth/Client error',
+        },
+      });
+      expect(mockClient.app.log).toHaveBeenCalledWith({
+        body: {
+          service: 'multi-notifier',
+          level: 'error',
+          message: 'WhatsApp Green-API: FAILED - Auth/Client error: 401',
         },
       });
     });
@@ -382,7 +399,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
@@ -407,7 +424,7 @@ describe('WhatsAppNotificationPlugin', () => {
       mockFetch.preconnect = () => Promise.resolve();
       global.fetch = mockFetch;
 
-      const plugin = await WhatsAppNotificationPlugin({ client: mockClient, project: mockProject } as any);
+      const plugin = await MultiNotificationPlugin({ client: mockClient, project: mockProject } as any);
 
       await plugin.event!({
         event: {
