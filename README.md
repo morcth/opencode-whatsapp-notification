@@ -108,8 +108,6 @@ Sent when AI needs user permission for an action. Includes all session data plus
 - Pending command
 - **Discord**: Orange embed (0xffa500)
 
-These colors provide visual distinction in Discord - green for successful completion, orange for attention-required permission requests.
-
 ## Testing
 
 ```bash
