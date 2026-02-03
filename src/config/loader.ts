@@ -5,6 +5,10 @@ import { ConfigError } from '../types/errors';
 import { DiscordProvider } from '../providers/discord';
 import { WhatsAppGreenApiProvider } from '../providers/whatsapp-greenapi';
 
+interface FileSystemLike {
+  readFile: (path: string, encoding: string) => Promise<string>;
+}
+
 interface MultiProviderConfigFile {
   enabled?: boolean;
   providers?: {
@@ -16,11 +20,18 @@ interface MultiProviderConfigFile {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function isMultiProviderConfigFile(config: unknown): config is MultiProviderConfigFile {
+  if (typeof config !== 'object' || config === null) {
+    return false;
+  }
+  return 'providers' in config || 'enabled' in config;
+}
+
 export class ConfigLoader {
   private readonly configPath: string;
-  private readonly fs: any;
+  private readonly fs: FileSystemLike | undefined;
 
-  constructor(configPath?: string, fs?: any) {
+  constructor(configPath?: string, fs?: FileSystemLike) {
     if (configPath) {
       this.configPath = configPath;
     } else {
@@ -38,7 +49,7 @@ export class ConfigLoader {
   }
 
   async load(): Promise<NotifierConfig> {
-    let config: any;
+    let config: unknown;
 
     const fs = await this.getFs();
 
@@ -59,6 +70,10 @@ export class ConfigLoader {
       throw new ConfigError('Config file is empty');
     }
 
+    if (!isMultiProviderConfigFile(config)) {
+      throw new ConfigError('Invalid config: must be a valid configuration object');
+    }
+
     const enabled = config.enabled ?? true;
 
     if (!enabled) {
@@ -72,8 +87,12 @@ export class ConfigLoader {
     throw new ConfigError('Invalid config: must have providers object');
   }
 
-  private loadMultiProviderConfig(config: any): MultiProviderConfig {
-    const providers: any = {};
+  private loadMultiProviderConfig(config: MultiProviderConfigFile): MultiProviderConfig {
+    const providers: Record<string, any> = {};
+
+    if (!config.providers) {
+      throw new ConfigError('Invalid config: must have providers object');
+    }
 
     if (config.providers.discord) {
       const discordConfig = config.providers.discord;

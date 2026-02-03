@@ -201,6 +201,24 @@ describe('ConfigLoader', () => {
   });
 
   describe('Multi-provider config validation', () => {
+    it('should return disabled config when enabled is false', async () => {
+      const mockFs = mockReadFile(JSON.stringify({
+        enabled: false,
+        providers: {
+          discord: {
+            enabled: true,
+            webhookUrl: 'https://discord.com/api/webhooks/test'
+          }
+        }
+      }));
+
+      const loader = new ConfigLoader(undefined, mockFs);
+      const config = await loader.load();
+
+      expect(config).toEqual({ enabled: false });
+      expect('providers' in config).toBe(false);
+    });
+
     it('should load valid multi-provider config', async () => {
       const mockFs = mockReadFile(JSON.stringify({
         enabled: true,
