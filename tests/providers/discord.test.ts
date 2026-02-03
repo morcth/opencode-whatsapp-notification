@@ -102,4 +102,59 @@ describe('DiscordProvider', () => {
 
     expect(body.embeds[0].color).toBe(0xffa500);
   });
+
+  it('should include all required embed fields', async () => {
+    const provider = new DiscordProvider({
+      provider: 'discord',
+      enabled: true,
+      webhookUrl: 'https://discord.com/api/webhooks/test'
+    });
+
+    const payload = {
+      eventType: 'session.idle',
+      sessionId: 'sess_123',
+      timestamp: '2026-02-03T00:00:00Z',
+      projectName: 'test-project',
+      peakTokens: 50000,
+      peakContextPercentage: 25,
+      modelName: 'gpt-4',
+      lastText: 'Response completed successfully'
+    };
+
+    await provider.send('session.idle', payload);
+
+    const body = JSON.parse(fetchCalls[0].init?.body as string);
+    const fields = body.embeds[0].fields;
+
+    const fieldNames = fields.map((f: any) => f.name);
+    expect(fieldNames).toContain('Peak Tokens');
+    expect(fieldNames).toContain('Peak Context');
+    expect(fieldNames).toContain('Model');
+  });
+
+  it('should validate webhook URL format', () => {
+    const provider = new DiscordProvider({
+      provider: 'discord',
+      enabled: true,
+      webhookUrl: 'https://discord.com/api/webhooks/test'
+    });
+
+    expect(provider.validateConfig({
+      webhookUrl: 'https://discord.com/api/webhooks/abc123/def456'
+    })).toEqual({ valid: true });
+
+    expect(provider.validateConfig({
+      webhookUrl: 'https://not-discord.com/webhook'
+    })).toEqual({
+      valid: false,
+      errors: ['webhookUrl must be a valid Discord webhook URL']
+    });
+
+    expect(provider.validateConfig({
+      enabled: true
+    })).toEqual({
+      valid: false,
+      errors: ['Missing webhookUrl']
+    });
+  });
 });
