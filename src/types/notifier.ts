@@ -13,6 +13,7 @@ export interface NotificationPayload {
 export type ValidationResult = { valid: true } | { valid: false; errors: string[] };
 
 export interface NotifierProvider {
+  name: string;
   send(eventType: string, payload: NotificationPayload): Promise<void>;
   validateConfig?(config: unknown): ValidationResult;
 }
@@ -40,4 +41,9 @@ export interface DisabledWhatsAppConfig {
   enabled: false;
 }
 
-export type NotifierConfig = WhatsAppConfig | DisabledWhatsAppConfig;
+export interface MultiProviderConfig {
+  enabled: boolean;
+  providers: Record<string, WhatsAppConfig | DiscordConfig>;
+}
+
+export type NotifierConfig = WhatsAppConfig | DisabledWhatsAppConfig | DiscordConfig | MultiProviderConfig;

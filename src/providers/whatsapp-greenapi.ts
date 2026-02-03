@@ -2,6 +2,7 @@ import type { NotifierProvider, NotificationPayload, WhatsAppConfig } from '../t
 import { TransportError } from '../types/errors';
 
 export class WhatsAppGreenApiProvider implements NotifierProvider {
+  name = 'WhatsApp Green-API';
   private config: WhatsAppConfig;
 
   constructor(config: WhatsAppConfig) {
