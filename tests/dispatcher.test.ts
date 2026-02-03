@@ -15,7 +15,7 @@ describe('dispatchNotification', () => {
     const mockProvider2 = { name: 'WhatsApp', send: vi.fn().mockResolvedValue(undefined) };
 
     const payload = {
-      eventType: 'session.idle',
+      eventType: 'session.idle' as const,
       sessionId: 'sess_123',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test',
@@ -42,7 +42,7 @@ describe('dispatchNotification', () => {
     };
 
     const payload = {
-      eventType: 'session.idle',
+      eventType: 'session.idle' as const,
       sessionId: 'sess_123',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test',
@@ -63,7 +63,7 @@ describe('dispatchNotification', () => {
 
   it('should handle empty providers array', async () => {
     const payload = {
-      eventType: 'session.idle',
+      eventType: 'session.idle' as const,
       sessionId: 'sess_123',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test',
@@ -73,6 +73,6 @@ describe('dispatchNotification', () => {
       lastText: 'Test'
     };
 
-    await expect(dispatchNotification(mockClient, [], 'session.idle', payload)).resolves.not.toThrow();
+    await dispatchNotification(mockClient, [], 'session.idle', payload);
   });
 });

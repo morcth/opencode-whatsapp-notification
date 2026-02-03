@@ -26,8 +26,8 @@ describe('ProviderRegistry', () => {
     const providers = ProviderRegistry.getProviders(config);
 
     expect(providers).toHaveLength(2);
-    expect(providers[0].name).toBe('Discord');
-    expect(providers[1].name).toBe('WhatsApp Green-API');
+    expect(providers[0]?.name).toBe('Discord');
+    expect(providers[1]?.name).toBe('WhatsApp Green-API');
   });
 
   it('should skip disabled providers', () => {
@@ -53,7 +53,7 @@ describe('ProviderRegistry', () => {
     const providers = ProviderRegistry.getProviders(config);
 
     expect(providers).toHaveLength(1);
-    expect(providers[0].name).toBe('WhatsApp Green-API');
+    expect(providers[0]?.name).toBe('WhatsApp Green-API');
   });
 
   it('should skip unknown provider and log error', () => {
@@ -74,6 +74,6 @@ describe('ProviderRegistry', () => {
     const providers = ProviderRegistry.getProviders(config as any);
 
     expect(providers).toHaveLength(1);
-    expect(providers[0].name).toBe('Discord');
+    expect(providers[0]?.name).toBe('Discord');
   });
 });

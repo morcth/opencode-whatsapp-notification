@@ -75,6 +75,7 @@ describe('Notifier Types', () => {
 
   it('NotifierProvider should have correct types', () => {
     const provider: NotifierProvider = {
+      name: 'Test Provider',
       async send(eventType: string, payload: NotificationPayload): Promise<void> {
         return;
       }
@@ -85,6 +86,7 @@ describe('Notifier Types', () => {
   it('NotifierProvider should support optional validateConfig', () => {
     const result: ValidationResult = { valid: true };
     const provider: NotifierProvider = {
+      name: 'Test Provider',
       async send(eventType: string, payload: NotificationPayload): Promise<void> {
         return;
       },

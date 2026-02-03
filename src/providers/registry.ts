@@ -13,14 +13,15 @@ export class ProviderRegistry {
     throw new ProviderError('Config must use multi-provider structure with providers object');
   }
 
-  static getProvider(config: NotifierConfig): NotifierProvider {
+  static getProvider(config: WhatsAppConfig | DiscordConfig): NotifierProvider {
     switch (config.provider) {
       case 'whatsapp-greenapi':
         return new WhatsAppGreenApiProvider(config as WhatsAppConfig);
       case 'discord':
         return new DiscordProvider(config as DiscordConfig);
       default:
-        throw new ProviderError(config.provider);
+        const _exhaustiveCheck: never = config;
+        throw new ProviderError('Unknown provider type');
     }
   }
 

@@ -5,12 +5,12 @@ const mockConfig = {
   enabled: true,
   providers: {
     discord: {
-      provider: 'discord',
+      provider: 'discord' as const,
       enabled: true,
       webhookUrl: 'https://discord.com/api/webhooks/test'
     },
     'whatsapp-greenapi': {
-      provider: 'whatsapp-greenapi',
+      provider: 'whatsapp-greenapi' as const,
       enabled: true,
       apiUrl: 'https://api.green-api.com',
       instanceId: '12345',
@@ -22,8 +22,9 @@ const mockConfig = {
 };
 
 const mockDisabledConfig = {
-  enabled: false
-};
+  enabled: false,
+  providers: {}
+} as const;
 
 function createMockClient() {
   return {

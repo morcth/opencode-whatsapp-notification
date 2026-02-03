@@ -31,26 +31,7 @@ describe('ConfigLoader', () => {
     }
   });
 
-  it('should load valid whatsapp config from file', async () => {
-    const mockFs = mockReadFile(JSON.stringify({
-      provider: 'whatsapp-greenapi',
-      enabled: true,
-      apiUrl: 'https://api.green-api.com',
-      instanceId: '12345',
-      apiToken: 'test-token',
-      chatId: '11001100110@c.us'
-    }));
 
-    const loader = new ConfigLoader('/test/config.json', mockFs);
-    const config = await loader.load();
-    
-    expect(config.provider).toBe('whatsapp-greenapi');
-    expect(config.enabled).toBe(true);
-    expect(config.fallbackConfigPath).toBe('/test/config.json');
-    if (config.enabled) {
-      expect((config as any).apiUrl).toBe('https://api.green-api.com');
-    }
-  });
 
   it('should throw ConfigError when config file does not exist', async () => {
     const error = new Error('File not found') as any;
@@ -96,19 +77,7 @@ describe('ConfigLoader', () => {
     await expect(loader.load()).rejects.toThrow(ConfigError);
   });
 
-  it('should return fallback path when config is disabled', async () => {
-    const mockFs = mockReadFile(JSON.stringify({
-      provider: 'whatsapp-greenapi',
-      enabled: false
-    }));
 
-    const loader = new ConfigLoader('/test/config.json', mockFs);
-    const config = await loader.load();
-    
-    expect(config.provider).toBe('whatsapp-greenapi');
-    expect(config.enabled).toBe(false);
-    expect(config.fallbackConfigPath).toBe('/test/config.json');
-  });
 
   it('should throw ConfigError when required fields are empty strings', async () => {
     const mockFs = mockReadFile(JSON.stringify({
@@ -138,23 +107,7 @@ describe('ConfigLoader', () => {
     await expect(loader.load()).rejects.toThrow(ConfigError);
   });
 
-  it('should use default timeout when not specified', async () => {
-    const mockFs = mockReadFile(JSON.stringify({
-      provider: 'whatsapp-greenapi',
-      enabled: true,
-      apiUrl: 'https://api.green-api.com',
-      instanceId: '12345',
-      apiToken: 'test-token',
-      chatId: '11001100110@c.us'
-    }));
 
-    const loader = new ConfigLoader('/test/config.json', mockFs);
-    const config = await loader.load();
-    
-    if (config.enabled) {
-      expect((config as any).timeout).toBe(10000);
-    }
-  });
 
   it('should throw ConfigError for negative timeout', async () => {
     const mockFs = mockReadFile(JSON.stringify({

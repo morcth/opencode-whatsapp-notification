@@ -18,6 +18,7 @@ export async function dispatchNotification(
 
   results.forEach((result, index) => {
     const provider = providers[index];
+    if (!provider) return;
 
     if (result.status === 'fulfilled') {
       console.log(`[Multi-Notifier] ${provider.name}: SUCCESS`);

@@ -51,7 +51,7 @@ describe('DiscordProvider', () => {
     });
 
     const payload = {
-      eventType: 'session.idle',
+      eventType: 'session.idle' as const,
       sessionId: 'sess_123',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test-project',
@@ -85,7 +85,7 @@ describe('DiscordProvider', () => {
     });
 
     const payload = {
-      eventType: 'permission.asked',
+      eventType: 'permission.asked' as const,
       sessionId: 'sess_456',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test-project',
@@ -111,7 +111,7 @@ describe('DiscordProvider', () => {
     });
 
     const payload = {
-      eventType: 'session.idle',
+      eventType: 'session.idle' as const,
       sessionId: 'sess_123',
       timestamp: '2026-02-03T00:00:00Z',
       projectName: 'test-project',
