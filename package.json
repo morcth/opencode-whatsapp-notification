@@ -1,7 +1,7 @@
 {
-  "name": "opencode-whatsapp-notification",
+  "name": "opencode-multi-notification",
   "version": "0.0.1",
-  "description": "OpenCode plugin that sends WhatsApp notifications on session completion and permission requests using Green-API.",
+  "description": "OpenCode plugin that sends multi-provider notifications (Discord and WhatsApp) on session completion and permission requests.",
   "main": "src/index.ts",
   "module": "src/index.ts",
   "type": "module",
@@ -12,9 +12,11 @@
   "keywords": [
     "opencode",
     "plugin",
+    "discord",
     "whatsapp",
     "green-api",
     "notification",
+    "multi-provider",
     "ai"
   ],
   "author": "",
