@@ -1,85 +1,105 @@
-# opencode-whatsapp-notification
+# OpenCode Multi-Notification Plugin
 
-OpenCode plugin that sends WhatsApp notifications on session completion and permission requests using Green-API.
+OpenCode plugin that sends notifications to Discord and/or WhatsApp when AI sessions complete or require permission.
 
 ## Features
 
-- Completion Notifications: Get a WhatsApp message when OpenCode finishes a long task.
-- Context Stats: Includes peak turn context usage percentage and token counts.
-- Model Info: Shows which model was used for the response.
-- Permission Alerts: Real-time notifications when OpenCode is blocked waiting for terminal permissions, including the command it's trying to run.
-- Provider Abstraction: Easy to add new notification channels (Discord, Slack, etc.) in future.
+- **Multi-provider support**: Send to Discord, WhatsApp, or both simultaneously
+- **Rich Discord embeds**: Color-coded notifications with detailed session info
+- **Error isolation**: If one provider fails, others still succeed
+- **Flexible configuration**: Enable/disable providers individually
 
 ## Installation
 
-Clone locally:
-
-```bash
-git clone <repo-url>
-cd opencode-whatsapp-notification
-```
-
-Drop plugin files in `.opencode/plugin/`:
-
-```bash
-# For project-level plugins
-mkdir -p .opencode/plugin/opencode-whatsapp-notification
-cp -r src/* .opencode/plugin/opencode-whatsapp-notification/
-
-# OR for global plugins
-mkdir -p ~/.config/opencode/plugin/opencode-whatsapp-notification
-cp -r src/* ~/.config/opencode/plugin/opencode-whatsapp-notification/
-```
-
-OpenCode loads all TypeScript files from `.opencode/plugin/` directory.
+1. Copy this plugin to your OpenCode plugins directory
+2. Create `config.json` in plugin directory
 
 ## Configuration
 
-After installing the plugin, copy `example.config.json` to `config.json` in the plugin directory and fill in your Green-API credentials:
-
-```bash
-# For project-level plugins
-cd .opencode/plugin/opencode-whatsapp-notification
-cp example.config.json config.json
-# Edit config.json with your credentials
-
-# OR for global plugins
-cd ~/.config/opencode/plugin/opencode-whatsapp-notification
-cp example.config.json config.json
-# Edit config.json with your credentials
-```
+### Example Configuration
 
 ```json
 {
-  "provider": "whatsapp-greenapi",
   "enabled": true,
-  "apiUrl": "https://api.green-api.com",
-  "instanceId": "YOUR_INSTANCE_ID",
-  "apiToken": "YOUR_API_TOKEN",
-  "chatId": "YOUR_PHONE_NUMBER@c.us",
-  "timeout": 10000
+  "providers": {
+    "discord": {
+      "enabled": true,
+      "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN",
+      "username": "OpenCode Notifier",
+      "avatarUrl": "https://example.com/your-avatar.png"
+    },
+    "whatsapp-greenapi": {
+      "enabled": true,
+      "apiUrl": "https://api.green-api.com",
+      "instanceId": "YOUR_INSTANCE_ID",
+      "apiToken": "YOUR_API_TOKEN",
+      "chatId": "YOUR_PHONE_NUMBER@c.us",
+      "timeout": 10000
+    }
+  }
 }
 ```
 
-### Configuration Fields
+### Provider Settings
 
-- `provider`: Must be "whatsapp-greenapi"
-- `enabled`: Set to `false` to disable notifications
-- `apiUrl`: Green-API base URL (usually `https://api.green-api.com`)
-- `instanceId`: Your Green-API instance ID
-- `apiToken`: Your Green-API API token
-- `chatId`: Your phone number in WhatsApp format (e.g., `11001100110@c.us`)
-- `timeout`: Optional HTTP timeout in milliseconds (default: 10000)
+#### Discord
 
-Get your Green-API credentials from https://green-api.com.
+- `enabled`: Enable/disable Discord notifications (default: true)
+- `webhookUrl`: Your Discord webhook URL (required)
+- `username`: Custom bot username (optional)
+- `avatarUrl`: Custom bot avatar URL (optional)
+
+#### WhatsApp (Green-API)
+
+- `enabled`: Enable/disable WhatsApp notifications (default: true)
+- `apiUrl`: Green-API base URL (default: https://api.green-api.com)
+- `instanceId`: Your Green-API instance ID (required)
+- `apiToken`: Your Green-API API token (required)
+- `chatId`: Target phone number in format `NUMBER@c.us` (required)
+- `timeout`: Request timeout in milliseconds (default: 10000)
+
+### Setting Up Discord Webhooks
+
+1. Go to your Discord server settings
+2. Navigate to Integrations → Webhooks
+3. Create new webhook
+4. Copy webhook URL to your config
+
+### Setting Up WhatsApp (Green-API)
+
+1. Register at [green-api.com](https://green-api.com)
+2. Create an instance
+3. Get your instance ID and API token
+4. Add your phone number to contacts
+5. Update config with your credentials
+
+## Notification Events
+
+### Session Idle
+
+Sent when an AI session completes. Includes:
+- Session ID and timestamp
+- Project name
+- Peak tokens and context usage
+- Model name
+- Last message preview
+- **Discord**: Green embed (0x00ff00)
+
+### Permission Asked
+
+Sent when AI needs user permission for an action. Includes all session data plus:
+- Pending command
+- **Discord**: Orange embed (0xffa500)
+
+## Testing
+
+```bash
+bun test
+```
 
 ## Development
 
-1. Clone the repo.
-2. Install dependencies: `bun install`.
-3. Type-check: `bun x tsc`.
-4. Run tests: `bun test`.
-
-## License
-
-MIT
+```bash
+bun run typecheck  # Type checking
+bun test           # Run tests
+```
